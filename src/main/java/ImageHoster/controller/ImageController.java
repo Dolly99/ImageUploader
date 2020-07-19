@@ -27,6 +27,8 @@ public class ImageController {
     @Autowired
     private TagService tagService;
 
+    public static final String EDIT_IMAGE_ERROR = "Only the owner of the image can edit the image";
+
     //This method displays all the images in the user home page after successful login
     @RequestMapping("images")
     public String getUserImages(Model model) {
@@ -93,12 +95,18 @@ public class ImageController {
     //The method first needs to convert the list of all the tags to a string containing all the tags separated by a comma and then add this string in a Model type object
     //This string is then displayed by 'edit.html' file as previous tags of an image
     @RequestMapping(value = "/editImage")
-    public String editImage(@RequestParam("imageId") Integer imageId, Model model) {
+    public String editImage(@RequestParam("imageId") Integer imageId, Model model, HttpSession session) {
         Image image = imageService.getImage(imageId);
 
-        String tags = convertTagsToString(image.getTags());
         model.addAttribute("image", image);
-        model.addAttribute("tags", tags);
+
+        if(image.getTags() != null && !image.getTags().isEmpty())
+            model.addAttribute("tags", convertTagsToString(image.getTags()));
+
+        if(!isUserLoggedIn(image, session)){
+            model.addAttribute("editError", EDIT_IMAGE_ERROR);
+            return "images/image";
+        }
         return "images/edit";
     }
 
@@ -146,6 +154,32 @@ public class ImageController {
         return "redirect:/images";
     }
 
+
+    //This method is used for getting the logged in user details
+    //returns null if the loggeduser object is empty
+    //else returns the loggeduser info
+    private User getLoggedInUser(HttpSession session) {
+        Object loggedUser = session.getAttribute("loggeduser");
+        if (loggedUser == null) {
+            return null;
+        }
+        return (User) loggedUser;
+    }
+
+    //This method is used to check whether the user has logged in
+    private boolean isUserLoggedIn(Image image, HttpSession session){
+        User loginUser = getLoggedInUser(session);
+        if(image == null || loginUser == null){
+            return false;
+        }
+        if(loginUser.getUsername() != null
+            && image.getUser() != null &&
+                image.getUser().getUsername() != null &&
+                    image.getUser().getUsername().equals(loginUser.getUsername())){
+            return true;
+        }
+        return false;
+    }
 
     //This method converts the image to Base64 format
     private String convertUploadedFileToBase64(MultipartFile file) throws IOException {
