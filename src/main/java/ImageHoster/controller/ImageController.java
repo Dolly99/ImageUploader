@@ -1,8 +1,10 @@
 package ImageHoster.controller;
 
+import ImageHoster.model.Comment;
 import ImageHoster.model.Image;
 import ImageHoster.model.Tag;
 import ImageHoster.model.User;
+import ImageHoster.service.CommentService;
 import ImageHoster.service.ImageService;
 import ImageHoster.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ public class ImageController {
     @Autowired
     private TagService tagService;
 
+    @Autowired
+    private CommentService commentService;
+
     public static final String EDIT_IMAGE_ERROR = "Only the owner of the image can edit the image";
     public static final String DELETE_IMAGE_ERROR = "Only the owner of the image can delete the image";
 
@@ -50,10 +55,11 @@ public class ImageController {
     //this list is then sent to 'images/image.html' file and the tags are displayed
     @RequestMapping("/images/{imageId}/{title}")
     public String showImage(@PathVariable("imageId") Integer imageId, @PathVariable("title") String title, Model model) {
-        //Image image = imageService.getImageByTitle(title);
         Image image = imageService.getImage(imageId);
         model.addAttribute("image", image);
         model.addAttribute("tags", image.getTags());
+        List<Comment> comments = commentService.fetCommentsByImageId(image);
+        if(comments != null && !comments.isEmpty()) model.addAttribute("comments", comments);
         return "images/image";
     }
 
@@ -103,6 +109,9 @@ public class ImageController {
 
         if(image.getTags() != null && !image.getTags().isEmpty())
             model.addAttribute("tags", convertTagsToString(image.getTags()));
+
+        List<Comment> comments = commentService.fetCommentsByImageId(image);
+        if(comments != null && !comments.isEmpty()) model.addAttribute("comments", comments);
 
         if(!isUserLoggedIn(image, session)){
             model.addAttribute("editError", EDIT_IMAGE_ERROR);
@@ -157,6 +166,8 @@ public class ImageController {
             model.addAttribute("image", image);
             if(image.getTags() != null && !image.getTags().isEmpty())
                 model.addAttribute("tags",convertTagsToString(image.getTags()));
+            List<Comment> comments = commentService.fetCommentsByImageId(image);
+            if (comments != null && !comments.isEmpty()) model.addAttribute("comments", comments);
             return "images/image";
         }
 
