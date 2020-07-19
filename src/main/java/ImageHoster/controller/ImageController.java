@@ -28,6 +28,7 @@ public class ImageController {
     private TagService tagService;
 
     public static final String EDIT_IMAGE_ERROR = "Only the owner of the image can edit the image";
+    public static final String DELETE_IMAGE_ERROR = "Only the owner of the image can delete the image";
 
     //This method displays all the images in the user home page after successful login
     @RequestMapping("images")
@@ -149,7 +150,16 @@ public class ImageController {
     //The method calls the deleteImage() method in the business logic passing the id of the image to be deleted
     //Looks for a controller method with request mapping of type '/images'
     @RequestMapping(value = "/deleteImage", method = RequestMethod.DELETE)
-    public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId) {
+    public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId, HttpSession session, Model model) {
+        Image image = imageService.getImage(imageId);
+        if(!isUserLoggedIn(image, session)){
+            model.addAttribute("deleteError", DELETE_IMAGE_ERROR);
+            model.addAttribute("image", image);
+            if(image.getTags() != null && !image.getTags().isEmpty())
+                model.addAttribute("tags",convertTagsToString(image.getTags()));
+            return "images/image";
+        }
+
         imageService.deleteImage(imageId);
         return "redirect:/images";
     }
