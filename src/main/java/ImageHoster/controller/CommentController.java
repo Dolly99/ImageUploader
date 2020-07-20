@@ -47,11 +47,13 @@ public class CommentController {
         User loggedInUser = getLoggedInUser(session);
         userComment.setUser(loggedInUser);
         userComment.setCreatedDate(new Date());
-        // Add comment
+
         commentService.createComment(userComment);
         return "redirect:/images/" + imageId + "/" + imageTitle;
     }
 
+    //This method is used for getting the logged in user
+    //returns the user
     private User getLoggedInUser(HttpSession session) {
         Object loggedUser = session.getAttribute("loggeduser");
         if (loggedUser == null) {
