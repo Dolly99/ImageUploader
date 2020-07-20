@@ -22,6 +22,7 @@ public class CommentService {
         repository.addComment(comment);
     }
 
+    //Call the getCommentsByImageId() method in the Repository and obtain a List of all the comments in the database
     public List<Comment> fetCommentsByImageId(Image image) {
         return repository.getCommentsByImageId(image);
     }

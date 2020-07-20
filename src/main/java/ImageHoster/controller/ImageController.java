@@ -32,7 +32,10 @@ public class ImageController {
     @Autowired
     private CommentService commentService;
 
+    //Displays this error message when other than owner tries to edit the image
     public static final String EDIT_IMAGE_ERROR = "Only the owner of the image can edit the image";
+
+    //Displays this error message when other than owner tries to delete the image
     public static final String DELETE_IMAGE_ERROR = "Only the owner of the image can delete the image";
 
     //This method displays all the images in the user home page after successful login
@@ -53,6 +56,10 @@ public class ImageController {
     //Also now you need to add the tags of an image in the Model type object
     //Here a list of tags is added in the Model type object
     //this list is then sent to 'images/image.html' file and the tags are displayed
+
+    /*
+    Added changes - get the image by imageId from database instead of title
+     */
     @RequestMapping("/images/{imageId}/{title}")
     public String showImage(@PathVariable("imageId") Integer imageId, @PathVariable("title") String title, Model model) {
         Image image = imageService.getImage(imageId);
@@ -101,10 +108,15 @@ public class ImageController {
 
     //The method first needs to convert the list of all the tags to a string containing all the tags separated by a comma and then add this string in a Model type object
     //This string is then displayed by 'edit.html' file as previous tags of an image
+    /*
+    * Added changes - added conditions such that only the owner of the image can edit it
+    * and returns to the edit.html page
+    * shows error when other than owner clicks on the edit link and returns the same image.html page
+    * * Added comments section for the image.
+     */
     @RequestMapping(value = "/editImage")
     public String editImage(@RequestParam("imageId") Integer imageId, Model model, HttpSession session) {
         Image image = imageService.getImage(imageId);
-
         model.addAttribute("image", image);
 
         if(image.getTags() != null && !image.getTags().isEmpty())
@@ -158,6 +170,12 @@ public class ImageController {
     //This controller method is called when the request pattern is of type 'deleteImage' and also the incoming request is of DELETE type
     //The method calls the deleteImage() method in the business logic passing the id of the image to be deleted
     //Looks for a controller method with request mapping of type '/images'
+     /*
+    * Added changes - added conditions such that only the owner of the image can delete it
+    * and returns to the images.html page
+    * shows error when other than owner clicks on the edit link and returns the same image.html page
+    * * Added comments section for the image.
+     */
     @RequestMapping(value = "/deleteImage", method = RequestMethod.DELETE)
     public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId, HttpSession session, Model model) {
         Image image = imageService.getImage(imageId);
@@ -187,7 +205,9 @@ public class ImageController {
         return (User) loggedUser;
     }
 
-    //This method is used to check whether the user has logged in
+    //This method is used to check whether the user has logged in or not
+    // returns true if the user has logged in
+    // else returns false if the user has not logged in
     private boolean isUserLoggedIn(Image image, HttpSession session){
         User loginUser = getLoggedInUser(session);
         if(image == null || loginUser == null){

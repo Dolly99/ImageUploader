@@ -1,10 +1,10 @@
-/*
 package ImageHoster.controller;
 
 import ImageHoster.model.Image;
 import ImageHoster.model.Tag;
 import ImageHoster.model.User;
 import ImageHoster.model.UserProfile;
+import ImageHoster.service.CommentService;
 import ImageHoster.service.ImageService;
 import ImageHoster.service.TagService;
 import org.junit.Test;
@@ -36,6 +36,9 @@ public class ImageControllerTest {
 
     @MockBean
     private ImageService imageService;
+
+    @MockBean
+    private CommentService commentService;
 
     @MockBean
     private TagService tagService;
@@ -302,6 +305,7 @@ public class ImageControllerTest {
 
 
         Mockito.when(imageService.getImage(Mockito.anyInt())).thenReturn(image);
+        Mockito.when(commentService.fetCommentsByImageId(Mockito.any(Image.class))).thenReturn(null);
 
         this.mockMvc.perform(delete("/deleteImage")
                 .param("imageId", "1")
@@ -309,5 +313,3 @@ public class ImageControllerTest {
                 .andExpect(model().attribute("deleteError", "Only the owner of the image can delete the image"));
     }
 }
-
-*/

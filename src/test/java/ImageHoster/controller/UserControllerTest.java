@@ -1,10 +1,11 @@
-/*
 package ImageHoster.controller;
 
 import ImageHoster.model.User;
 import ImageHoster.model.UserProfile;
 import ImageHoster.service.ImageService;
+import ImageHoster.service.PasswordValidator;
 import ImageHoster.service.UserService;
+import ImageHoster.service.PasswordValidator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -36,6 +37,9 @@ public class UserControllerTest {
 
     @MockBean
     private ImageService imageService;
+
+    @MockBean
+    private PasswordValidator passwordValidator;
 
     //This test checks the controller logic for user signup when user requests for a registration form and checks whether the logic returns the html file 'users/registration.html'
     @Test
@@ -81,6 +85,7 @@ public class UserControllerTest {
         user.setUsername("Abhi");
         user.setPassword("password1@");
 
+        Mockito.when(passwordValidator.validate(Mockito.anyString())).thenReturn(true);
 
         this.mockMvc.perform(post("/users/registration")
                 .flashAttr("user", user)
@@ -167,4 +172,3 @@ public class UserControllerTest {
                 .andExpect(content().string(containsString("Image Hoster")));
     }
 }
-*/
